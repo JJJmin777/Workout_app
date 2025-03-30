@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'workout_selection_screen.dart';
+import 'login_form.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -16,12 +16,11 @@ class LoginScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()),
+                  MaterialPageRoute(builder: (_) => LoginForm()),
                 );
               },
               child: Text("로그인"),
             ),
-            SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
