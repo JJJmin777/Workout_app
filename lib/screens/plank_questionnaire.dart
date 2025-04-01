@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'home_screen.dart';
+import 'plank_result_screen.dart';
 
 class PlankQuestionnaire extends StatefulWidget{
   @override
@@ -11,7 +10,6 @@ class PlankQuestionnaire extends StatefulWidget{
 
 class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
   int step = 0;
-  String result = "";
 
   void nextStep(int answer) {
     setState(() {
@@ -21,28 +19,24 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
 
       } else if (step == 1) {
         if (answer == 1 || answer == 2) {
-          result = "오늘은 7초 플랭크를 해보세요!";
-          saveResultToFirebase("plank", "7초 추천");
+          saveResultToFirebase("plank", 7, "당신의 경험에 따라 7초 플랭크부터 시작해보세요.");
         } else {
-          result = "60초 플랭크 도전해보세요!";
-          saveResultToFirebase("plank", "60초 추천");
+          saveResultToFirebase("plank", 60, "좋아요! 바로 60초 플랭크에 도전해보세요.");
         }
         step = 3;
 
       } else if (step == 2) {
         if (answer == 1 || answer == 2) {
-          result = "오늘은 7초 플랭크를 해보세요!";
-          saveResultToFirebase("plank", "7초 추천");
+          saveResultToFirebase("plank", 7, "운동 습관이 적으시군요. 7초부터 천천히 시작해봐요.");
         } else {
-          result = "15초 플랭크 도전해보세요!";
-          saveResultToFirebase("plank", "15초 추천");
+          saveResultToFirebase("plank", 15, "운동을 자주 하시네요! 15초 플랭크로 시작해봐요.");
         }
         step = 3;
       }
     });
   }
 
-  void saveResultToFirebase(String workout, String level) async {
+  void saveResultToFirebase(String workout, int levelSeconds, String resultText) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await FirebaseFirestore.instance
@@ -51,15 +45,14 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
           .set({
         'email': user.email,
         'workout': workout,
-        'level': level,
+        'level_seconds': levelSeconds, // 숫자 형식으로 저장 ✅
         'timestamp': FieldValue.serverTimestamp(),
       });
 
       // 저장 후 홈으로 이동
-      Navigator.pushAndRemoveUntil(
-        context, 
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-        (route) => false,  
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => PlankResultScreen(resultText: resultText)),
       );
     }
   }
@@ -109,26 +102,7 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
         ),
       );
     } else {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(result, style: TextStyle(fontSize: 24)),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context, 
-                    MaterialPageRoute(builder: (_) => HomeScreen()),
-                    (route) => false,
-                  );
-                },
-                child: Text("홈으로 가기"),
-              )
-            ]
-          )
-        ),
-      );
+      return SizedBox.shrink();
     }
   }
 }
