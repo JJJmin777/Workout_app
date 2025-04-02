@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'workout_selection_screen.dart';
 import 'workout_history_screen.dart';
+import 'workout_timer_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser;
@@ -29,19 +30,36 @@ class HomeScreen extends StatelessWidget {
             Text("오늘 운동을 시작하시겠습니까?", style: TextStyle(fontSize: 20)),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // 운동 시작 로직 또는 타이머 연결
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()),
-                );
-              }, 
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                print("[LOG] 운동 시작 버튼 클릭됨. 사용자: \${user?.email}");
+                if (user != null){
+                  final doc = await FirebaseFirestore.instance
+                      .collection('workout_profiles')
+                      .doc(user.uid)
+                      .get();
+                  if (doc.exists) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    print("[LOG] 사용자 운동 데이터 로드됨: \${data.toString()}");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WorkoutTimerScreen(
+                          workout: data['workout'],
+                          durationSeconds: data['level_seconds'],
+                        ),
+                      ),
+                    );
+                  } else {
+                    print("[LOG] workout_profiles 문서가 존재하지 않음");
+                  }
+                }
+              },
               child: Text("운동 시작하기"),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                // ✅ 수정된 부분: 운동 초기화 후 다시 설문 화면으로 이동
                 final user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
                   await FirebaseFirestore.instance

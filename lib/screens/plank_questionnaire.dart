@@ -40,7 +40,7 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await FirebaseFirestore.instance
-          .collection('workout_results')
+          .collection('workout_profiles')
           .doc(user.uid)
           .set({
         'email': user.email,

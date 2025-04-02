@@ -21,6 +21,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            print("[DEBUG] 불러온 문서 수: ${snapshot.data?.docs.length ?? 0}");
             return Center(child: Text("운동 기록이 없습니다."));
           }
 
