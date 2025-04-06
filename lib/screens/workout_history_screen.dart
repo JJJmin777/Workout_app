@@ -7,6 +7,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    print("현재 로그인된 UID: ${user?.uid}");
 
     return Scaffold(
       appBar: AppBar(title: Text("운동 기록 보기")),

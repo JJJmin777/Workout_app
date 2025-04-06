@@ -56,7 +56,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
         'userId': user.uid,
         'workout': widget.workout,
         'duration': widget.durationSeconds,
-        'date': DateTime.now(),
+        'date': FieldValue.serverTimestamp(),
       });
 
       showDialog(
