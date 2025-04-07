@@ -15,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  Map<DateTime, List<String>> workoutEvents = {};
+  Map<DateTime, List<Map<String, dynamic>>> workoutEvents = {};
 
   @override
   void initState() {
@@ -32,28 +32,30 @@ class _HomeScreenState extends State<HomeScreen> {
         .where('userId', isEqualTo: user!.uid)
         .get();
 
-    Map<DateTime, List<String>> events = {};
+    Map<DateTime, List<Map<String, dynamic>>> events = {};
 
     for (var doc in snapshot.docs) {
       final data = doc.data();
       final workoutName = data['workout'] ?? '운동';
-      final timestamp = data['timestamp'] as Timestamp?;
+      final duration = data['duration'] ?? 0;
+      final timestamp = data['date'] as Timestamp?;
       if (timestamp != null) {
         final date = DateTime(timestamp.toDate().year, timestamp.toDate().month, timestamp.toDate().day);
         events.update(
           date, 
-          (value) => [...value, workoutName], // value가 있으면 복사한뒤 workoutName을 저장
-          ifAbsent: () => [workoutName]
+          (value) => [...value, {'workout': workoutName, 'duration': duration}], // value가 있으면 복사한뒤 workoutName을 저장
+          ifAbsent: () => [{'workout': workoutName, 'duration': duration}]
         );
       }
     }
 
     setState(() {
       workoutEvents = events;
+      print('[DEBUG] 운동 기록 불러오기 완료: $workoutEvents');
     });
   }
 
-  List<String> getEventsForDay(DateTime day) {
+  List<Map<String, dynamic>> getEventsForDay(DateTime day) {
     final normalized = DateTime(day.year, day.month, day.day);
     return workoutEvents[normalized] ?? [];
   }
@@ -73,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -95,11 +97,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.green,
                   shape: BoxShape.circle,
                 ),
+                markerSize: 6.0, // 마커 크기
+                markersMaxCount: 3, // 한 날짜에 최대 몇 개까지 표시할지
               ),
             ),
             const SizedBox(height: 8),
             if (_selectedDay != null)
-              ...getEventsForDay(_selectedDay!).map((e) => ListTile(title: Text("운동: $e"))),
+              ...getEventsForDay(_selectedDay!).map((e) {
+                final workout = e['workout'];
+                final duration = e['duration'];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 4,
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.fitness_center, color: Colors.deepPurple),
+                      title: Text(
+                        "운동: $workout",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text("소요 시간: $duration초"),
+                    ),
+                  ),
+                );
+              }),
 
             const SizedBox(height: 20),
             Text("오늘 운동을 시작하시겠습니까?", style: TextStyle(fontSize: 20)),
@@ -158,7 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }, 
               child: Text("운동 기록 보기")
-            )
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

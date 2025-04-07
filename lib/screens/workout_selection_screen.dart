@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workout_app/screens/plank_questionnaire.dart';
+import 'package:workout_app/screens/running_questionnaire.dart';
 
 class WorkoutSelectionScreen extends StatelessWidget {
 
@@ -11,7 +12,13 @@ class WorkoutSelectionScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min, // 중앙 정렬 효과
           children: [
-            ElevatedButton(onPressed: () {}, child: Text("런닝")),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RunningQuestionnaire()),
+                );
+            }, child: Text("런닝")),
             SizedBox(height: 10),
             ElevatedButton(onPressed: () {}, child: Text("계단 오르기")),
             SizedBox(height: 10),
