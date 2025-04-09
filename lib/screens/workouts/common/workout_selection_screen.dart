@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:workout_app/screens/plank_questionnaire.dart';
-import 'package:workout_app/screens/running_questionnaire.dart';
+import 'package:workout_app/screens/questionnaire/plank_questionnaire.dart';
+import 'package:workout_app/screens/questionnaire/running_questionnaire.dart';
+import 'package:workout_app/screens/questionnaire/stairs_questionnaire.dart';
 
 class WorkoutSelectionScreen extends StatelessWidget {
 
@@ -20,7 +21,13 @@ class WorkoutSelectionScreen extends StatelessWidget {
                 );
             }, child: Text("런닝")),
             SizedBox(height: 10),
-            ElevatedButton(onPressed: () {}, child: Text("계단 오르기")),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => StairsQuestionnaire()),
+                );
+              }, child: Text("계단 오르기")),
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {

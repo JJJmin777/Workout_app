@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:workout_app/screens/home_screen.dart';
 
 import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/workout_selection_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/workouts/common/workout_selection_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 시스템 준비

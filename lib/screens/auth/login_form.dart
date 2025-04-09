@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'workout_selection_screen.dart';
+import '../workouts/common/workout_selection_screen.dart';
 
 class LoginForm extends StatelessWidget {
   final emailController = TextEditingController();

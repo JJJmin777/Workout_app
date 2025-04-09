@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'plank_result_screen.dart';
+import 'questionnaire_result_screen.dart';
 
-class PlankQuestionnaire extends StatefulWidget{
+class RunningQuestionnaire extends StatefulWidget{
   @override
-  _PlankQuestionnaireState createState() => _PlankQuestionnaireState();
+  _RunningQuestionnaireState createState() => _RunningQuestionnaireState();
 }
 
-class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
+class _RunningQuestionnaireState extends State<RunningQuestionnaire> {
   int step = 0;
 
   void nextStep(int answer) {
@@ -18,19 +18,23 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
         else step = 2; // 안 해봤다
 
       } else if (step == 1) {
-        if (answer == 1 || answer == 2) {
-          saveResultToFirebase("plank", 7, "당신의 경험에 따라 7초 플랭크부터 시작해보세요.");
-        } else {
-          saveResultToFirebase("plank", 60, "좋아요! 바로 60초 플랭크에 도전해보세요.");
+        if (answer == 1) {
+          saveResultToFirebase("running", 300, "한 트랙정도로 천천히 시작해봐요!");
+        } else if (answer == 2) {
+          saveResultToFirebase("running", 600, "좋아요! 10분 러닝에 도전해보세요.");
+        } else if (answer == 3) {
+          saveResultToFirebase("running", 1200, "대단해요! 20분 러닝이 당신에게 딱이에요.");
         }
         step = 3;
 
       } else if (step == 2) {
-        if (answer == 1 || answer == 2) {
-          saveResultToFirebase("plank", 7, "운동 습관이 적으시군요. 7초부터 천천히 시작해봐요.");
-        } else {
-          saveResultToFirebase("plank", 15, "운동을 자주 하시네요! 15초 플랭크로 시작해봐요.");
-        }
+        if (answer == 1) {
+          saveResultToFirebase("running", 150, "가벼운 러닝부터 시작해보는 건 어때요?");
+        } else if (answer == 2) {
+          saveResultToFirebase("running", 300, "좋아요! 5분 러닝부터 천천히 도전해봐요.");
+        } else if (answer == 3) {
+          saveResultToFirebase("running", 400, "운동을 자주 하시는군요! 7분 러닝 도전해보세요.");
+        } 
         step = 3;
       }
     });
@@ -52,7 +56,12 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
       // 저장 후 홈으로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => PlankResultScreen(resultText: resultText)),
+        MaterialPageRoute(builder: (_) => QuestionnaireResultScreen(
+            workout: workout, 
+            levelSeconds:levelSeconds,
+            resultText: resultText,
+          )
+        ),
       );
     }
   }
@@ -61,12 +70,12 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
   Widget build(BuildContext context) {
     if (step == 0) {
       return Scaffold(
-        appBar: AppBar(title: Text("플랭크")),
+        appBar: AppBar(title: Text("런닝")),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("플랭크를 해보셨나요?"),
+              Text("런닝을 주로 하세요?"),
               ElevatedButton(onPressed: () => nextStep(1), child: Text("네")),
               ElevatedButton(onPressed: () => nextStep(2), child: Text("아니요")),
             ],
@@ -79,10 +88,10 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("얼마나 할 수 있나요?"),
-              ElevatedButton(onPressed: () => nextStep(1), child: Text("15초")),
-              ElevatedButton(onPressed: () => nextStep(2), child: Text("30초")),
-              ElevatedButton(onPressed: () => nextStep(3), child: Text("60초")),
+              Text("쉬지 않고 얼마나 달릴수 있나요?"),
+              ElevatedButton(onPressed: () => nextStep(1), child: Text("500m이하")),
+              ElevatedButton(onPressed: () => nextStep(2), child: Text("1km이하")),
+              ElevatedButton(onPressed: () => nextStep(3), child: Text("그 이상")),
             ],
           )
         )

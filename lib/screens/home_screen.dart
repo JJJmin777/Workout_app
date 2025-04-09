@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'workout_selection_screen.dart';
-import 'workout_history_screen.dart';
-import 'workout_timer_screen.dart';
+import 'workouts/common/workout_selection_screen.dart';
+import 'workouts/common/workout_history_screen.dart';
+import 'workouts/plank/plnak_timer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser;
+  Map<String, dynamic>? workoutData;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<DateTime, List<Map<String, dynamic>>> workoutEvents = {};
@@ -20,7 +21,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    loadWorkoutProfile();
     fetchWorkoutDates();
+  }
+
+  // ✅ Firestore에서 저장된 운동 불러오기
+  Future<void> loadWorkoutProfile() async {
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('workout_profiles')
+          .doc(user!.uid)
+          .get();
+      
+      if (doc.exists) {
+        setState(() {
+          workoutData = doc.data() as Map<String, dynamic>;
+        });
+      }
+    }
   }
 
   // ✅ Firestore에서 운동 기록 불러오기
