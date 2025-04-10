@@ -4,17 +4,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../home_screen.dart';
 
-class WorkoutTimerScreen extends StatefulWidget{
+class PlankScreen extends StatefulWidget{
   final String workout;
-  final int durationSeconds;
+  final int targetSeconds;
 
-  WorkoutTimerScreen({required this.workout, required this.durationSeconds});
+  PlankScreen({required this.workout, required this.targetSeconds});
 
   @override
-  _WorkoutTimerScreenState createState() => _WorkoutTimerScreenState();
+  _PlankScreenState createState() => _PlankScreenState();
 }
 
-class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
+class _PlankScreenState extends State<PlankScreen> {
   late int remainingSeconds;
   Timer? timer;
   bool isRunning = false;
@@ -22,7 +22,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   @override
   void initState() {
     super.initState();
-    remainingSeconds = widget.durationSeconds;
+    remainingSeconds = widget.targetSeconds;
   }
 
   void startTimer() {
@@ -55,7 +55,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       await FirebaseFirestore.instance.collection('workout_logs').add({
         'userId': user.uid,
         'workout': widget.workout,
-        'duration': widget.durationSeconds,
+        'duration': widget.targetSeconds,
         'date': FieldValue.serverTimestamp(),
       });
 

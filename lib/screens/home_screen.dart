@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'workouts/common/workout_selection_screen.dart';
 import 'workouts/common/workout_history_screen.dart';
-import 'workouts/plank/plnak_timer_screen.dart';
+
+import 'workouts/plank/plnak_screen.dart';
+import 'workouts/stairs/stairs_screen.dart';
+import 'workouts/running/running_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -32,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('workout_profiles')
           .doc(user!.uid)
           .get();
-      
+
       if (doc.exists) {
         setState(() {
           workoutData = doc.data() as Map<String, dynamic>;
@@ -76,6 +79,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> getEventsForDay(DateTime day) {
     final normalized = DateTime(day.year, day.month, day.day);
     return workoutEvents[normalized] ?? [];
+  }
+
+  String getUnit(String workout) {
+    if (workout == "plank") return "초";
+    if (workout == "running") return "m";
+    if (workout == "stairs") return "층";
+    return '';
   }
 
   @override
@@ -145,31 +155,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 20),
             Text("오늘 운동을 시작하시겠습니까?", style: TextStyle(fontSize: 20)),
+            if (workoutData != null) ...[
+              SizedBox(height: 10),
+              Text("${workoutData!['workout']}(${workoutData!['level_seconds']}${getUnit(workoutData!['workout'])})", 
+                style: TextStyle(fontSize: 16)),
+            ],
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                print("[LOG] 운동 시작 버튼 클릭됨. 사용자: \${user?.email}");
-                if (user != null){
-                  final doc = await FirebaseFirestore.instance
-                      .collection('workout_profiles')
-                      .doc(user.uid)
-                      .get();
-                  if (doc.exists) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    print("[LOG] 사용자 운동 데이터 로드됨: \${data.toString()}");
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WorkoutTimerScreen(
-                          workout: data['workout'],
-                          durationSeconds: data['level_seconds'],
-                        ),
-                      ),
-                    );
-                  } else {
-                    print("[LOG] workout_profiles 문서가 존재하지 않음");
-                  }
+              onPressed: () {
+                if (workoutData == null) return;
+                final workout = workoutData!["workout"];
+                final level = workoutData!["level_seconds"];
+
+                if (workout == 'plank') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PlankScreen(workout: workout, targetSeconds: level,)
+                    )
+                  );
+                } else if (workout == 'running') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RunningScreen(workout: workout, targetDistance: level,)
+                    )
+                  );
+                } else if (workout == "stairs") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StairsTimerScreen(workout: workout, targetfloors: level,)
+                    )
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("지원되지 않는 운동 유형입니다."))
+                  );
                 }
               },
               child: Text("운동 시작하기"),
