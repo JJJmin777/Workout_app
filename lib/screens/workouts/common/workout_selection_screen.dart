@@ -7,6 +7,8 @@ class WorkoutSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('[DEBUG] WorkoutSelectionScreen 진입');
+
     return Scaffold(
       appBar: AppBar(title: Text("운동을 선택하세요")),
       body: Center( // <- 화면 중앙 정렬

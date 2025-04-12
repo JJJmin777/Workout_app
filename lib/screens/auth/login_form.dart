@@ -13,10 +13,8 @@ class LoginForm extends StatelessWidget {
         password: passwordController.text.trim(),
       );
 
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()), // 기존 화면을 아예 지우고 새 화면으로 교체 (뒤로가기 안 됨)
-      );
+      // ✅ 로그인 성공하면 LoginForm 화면 닫기 (뒤로가기처럼)
+      Navigator.pop(context);
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
