@@ -88,6 +88,31 @@ class _HomeScreenState extends State<HomeScreen> {
     return '';
   }
 
+  void startWorkoutSequence(List<dynamic> workouts) async {
+    for (var workoutEntry in workouts) {
+      final workout = workoutEntry['workout'];
+      final level = workoutEntry['level_seconds'];
+
+      Widget screen;
+      if (workout == 'plank') {
+        screen = PlankScreen(workout: workout, targetSeconds: level);
+      } else if (workout == 'running') {
+        screen = RunningScreen(workout: workout, targetDistance: level);
+      } else if (workout == 'stairs') {
+        screen = StairsTimerScreen(workout: workout, targetfloors: level);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("지원되지 않는 운동 유형입니다: $workout"))
+        );
+        return;
+      }
+
+      final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+
+      if (result == 'cancel') break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,44 +180,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 20),
             Text("오늘 운동을 시작하시겠습니까?", style: TextStyle(fontSize: 20)),
-            if (workoutData != null) ...[
+            if (workoutData != null && workoutData!['workouts'] != null) ...[
               SizedBox(height: 10),
-              Text("${workoutData!['workout']}(${workoutData!['level_seconds']}${getUnit(workoutData!['workout'])})", 
-                style: TextStyle(fontSize: 16)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: (workoutData!['workouts'] as List<dynamic>).map((w) {
+                  final workout = w['workout'];
+                  final level = w['level_seconds'];
+                  return Text("• $workout (${level}${getUnit(workout)})");
+                }).toList(),
+              )
             ],
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                if (workoutData == null) return;
-                final workout = workoutData!["workout"];
-                final level = workoutData!["level_seconds"];
-
-                if (workout == 'plank') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PlankScreen(workout: workout, targetSeconds: level,)
-                    )
-                  );
-                } else if (workout == 'running') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RunningScreen(workout: workout, targetDistance: level,)
-                    )
-                  );
-                } else if (workout == "stairs") {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => StairsTimerScreen(workout: workout, targetfloors: level,)
-                    )
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("지원되지 않는 운동 유형입니다."))
-                  );
-                }
+                if (workoutData == null || workoutData!['workouts'] == null) return;
+                final workouts = List<Map<String, dynamic>>.from(workoutData!["workouts"]);
+                startWorkoutSequence(workouts);
               },
               child: Text("운동 시작하기"),
             ),

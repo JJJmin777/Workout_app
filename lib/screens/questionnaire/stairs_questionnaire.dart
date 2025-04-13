@@ -43,13 +43,48 @@ class _StairsQuestionnaireState extends State<StairsQuestionnaire> {
   void saveResultToFirebase(String workout, int levelSeconds, String resultText) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await FirebaseFirestore.instance
+      final profileRef = FirebaseFirestore.instance
           .collection('workout_profiles')
-          .doc(user.uid)
-          .set({
+          .doc(user.uid);
+      
+      final snapshot = await profileRef.get();
+
+      // 기존 workouts 배열 불러오기
+      List<Map<String, dynamic>> updatedWorkouts = [];
+
+      if (snapshot.exists && snapshot.data()!['workouts'] != null) {
+        final List<dynamic> current = snapshot.data()!['workouts'];
+
+        // workout 이름 기준으로 덮어쓰기
+        updatedWorkouts = current.map<Map<String, dynamic>>((w) {
+          if (w['workout'] == workout) {
+            return {
+              'wokrout': workout,
+              'level_seconds': levelSeconds, // 업데이트된 값으로 교체
+            };
+          }
+          return Map<String, dynamic>.from(w);
+        }).toList();
+
+        // 새 workout이 없다면 추가
+        final exists = current.any((w) => w['workout'] == workout);
+        if (!exists) {
+          updatedWorkouts.add({
+            'workout': workout,
+            'level_seconds': levelSeconds,
+          });
+        }
+      } else{
+        // 최초 저장
+        updatedWorkouts = [
+          {'workout': workout, 'level_seconds': levelSeconds}
+        ];
+      }
+
+      // 문서 전체 업데이트
+      await profileRef.set({
         'email': user.email,
-        'workout': workout,
-        'level_seconds': levelSeconds, // 숫자 형식으로 저장 ✅
+        'workouts': updatedWorkouts,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
