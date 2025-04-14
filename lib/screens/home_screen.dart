@@ -202,18 +202,30 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  await FirebaseFirestore.instance
-                      .collection('workout_profiles')
-                      .doc(user.uid)
-                      .delete();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()),
-                  );
-                }
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text("운동 다시 설정"),
+                    content: Text("현재 설정된 운동 위에 덮어쓰게 됩니다.\n기존 운동은 유지됩니다."),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("취소"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()),
+                          );
+                        },
+                        child: Text("계속"),
+                      ),
+                    ],
+                  ),
+                );
               },
               child: Text("운동 다시 설정하기"),
             ),

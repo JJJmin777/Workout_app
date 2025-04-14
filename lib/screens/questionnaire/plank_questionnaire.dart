@@ -38,59 +38,65 @@ class _PlankQuestionnaireState extends State<PlankQuestionnaire> {
 
   void saveResultToFirebase(String workout, int levelSeconds, String resultText) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final profileRef = FirebaseFirestore.instance
-          .collection('workout_profiles')
-          .doc(user.uid);
-      
-      final snapshot = await profileRef.get();
+    if (user == null) return;
 
-      // 기존 workouts 배열 불러오기
-      List<Map<String, dynamic>> updatedWorkouts = [];
+    final profileRef = FirebaseFirestore.instance.collection('workout_profiles').doc(user.uid);
+    final snapshot = await profileRef.get();
 
-      if (snapshot.exists && snapshot.data()!['workouts'] != null) {
-        final List<dynamic> current = snapshot.data()!['workouts'];
+    List<Map<String, dynamic>> updatedWorkouts = [];
 
-        // workout 이름 기준으로 덮어쓰기
-        updatedWorkouts = current.map<Map<String, dynamic>>((w) {
-          if (w['workout'] == workout) {
-            return {
-              'workout': workout,
-              'level_seconds': levelSeconds, // 업데이트된 값으로 교체
-            };
-          }
-          return Map<String, dynamic>.from(w);
-        }).toList();
+    if (snapshot.exists && snapshot.data()?['workouts'] != null) {
+      final current = snapshot.data()!['workouts'] as List<dynamic>;
 
-        // 새 workout이 없다면 추가
-        final exists = current.any((w) => w['workout'] == workout);
-        if (!exists) {
-          updatedWorkouts.add({
+      // 이미 있는 workout이면 덮어쓰기, 없으면 그대로
+      updatedWorkouts = current.map<Map<String, dynamic>>((w) {
+        if (w['workout'] == workout) {
+          return {
             'workout': workout,
-            'level_seconds': levelSeconds,
-          });
+            'level_seconds': levelSeconds, // 업데이트된 값으로 교체
+          };
         }
+        return Map<String, dynamic>.from(w);
+      }).toList();
 
-        // 문서 전체 업데이트
-        await profileRef.set({
-          'email': user.email,
-          'workouts': updatedWorkouts,
-          'timestamp': FieldValue.serverTimestamp(),
+      // 새 workout이 없다면 추가
+      final exists = current.any((w) => w['workout'] == workout);
+      if (!exists) {
+        updatedWorkouts.add({
+          'workout': workout,
+          'level_seconds': levelSeconds,
         });
-
-        // 저장 후 홈으로 이동
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => QuestionnaireResultScreen(
-              workout: workout, 
-              levelSeconds:levelSeconds,
-              resultText: resultText,
-            )
-          ),
-        );
       }
-    }
+    } else {
+    updatedWorkouts = [
+      {
+        'workout': workout,
+        'level_seconds': levelSeconds,
+      }
+    ];
+  }
+
+    // Firebase 저장 (문서 전체 업데이트)
+    await profileRef.set({
+      'email': user.email,
+      'workouts': updatedWorkouts,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    if (!mounted) return; // ← 비동기 처리 중 화면이 dispose된 경우 방지
+
+    // 저장 후 홈으로 이동
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuestionnaireResultScreen(
+          workout: workout, 
+          levelSeconds:levelSeconds,
+          resultText: resultText,
+        )
+      ),
+    );
+  }
   
 
   @override
