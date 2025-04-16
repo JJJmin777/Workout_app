@@ -89,28 +89,80 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void startWorkoutSequence(List<dynamic> workouts) async {
-    for (var workoutEntry in workouts) {
-      final workout = workoutEntry['workout'];
-      final level = workoutEntry['level_seconds'];
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-      Widget screen;
-      if (workout == 'plank') {
-        screen = PlankScreen(workout: workout, targetSeconds: level);
-      } else if (workout == 'running') {
-        screen = RunningScreen(workout: workout, targetDistance: level);
-      } else if (workout == 'stairs') {
-        screen = StairsTimerScreen(workout: workout, targetfloors: level);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("지원되지 않는 운동 유형입니다: $workout"))
-        );
-        return;
-      }
+    // 오늘 한 운동 불러오기
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
 
-      final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    final snapshot = await FirebaseFirestore.instance
+        .collection('workout_logs')
+        .where('userId', isEqualTo: user.uid)
+        .where('date', isGreaterThanOrEqualTo: todayStart)
+        .get();
 
-      if (result == 'cancel') break;
+    final doneToday = snapshot.docs.map((doc) => doc['workout'] as String).toSet();
+
+    final remainingWorkouts = workouts.where((w) => !doneToday.contains(w['workout'])).toList();
+
+    if (remainingWorkouts.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("운동 완료!"),
+          content: Text("오늘의 모든 운동을 완료하셨습니다! 👏"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("확인"),
+            ),
+          ],
+        ),
+      );
+      return;
     }
+
+    // 운동 버튼들을 보여주는 화면으로 이동
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text("오늘 남은 운동을 선택하세요:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ...remainingWorkouts.map((w) {
+            final workout = w['workout'];
+            final level = w['level_seconds'];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  Widget screen;
+                  if (workout == 'plank') {
+                    screen = PlankScreen(workout: workout, targetSeconds: level);
+                  } else if (workout == 'running') {
+                    screen = RunningScreen(workout: workout, targetDistance: level);
+                  } else if (workout == 'stairs') {
+                    screen = StairsTimerScreen(workout: workout, targetfloors: level);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("지원되지 않는 운동 유형입니다: $workout"))
+                    );
+                    return;
+                  }
+
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+                },
+                child: Text("${workout} 시작하기 (${level}${getUnit(workout)})"),
+              ),
+            );
+          }).toList()
+        ],
+      )
+    );
   }
 
   @override
