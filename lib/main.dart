@@ -2,29 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:workout_app/screens/home_screen.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/workouts/common/workout_selection_screen.dart';
+import 'screens/workouts/common/workout_history_screen.dart';
+import 'screens/settings/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 시스템 준비
   await Firebase.initializeApp(); // Firebase 준비
   runApp(MyApp());
-}
-
-Future<bool> hasWorkoutProfile(User user) async {
-  final doc = await FirebaseFirestore.instance
-      .collection('workout_profiles')
-      .doc(user.uid)
-      .get();
-
-  print('[DEBUG] 불러온 문서 ID: ${user.uid}');
-  print('[DEBUG] 문서 존재 여부: ${doc.exists}');
-  print('[DEBUG] 문서 내용: ${doc.data()}');
-  
-  return doc.exists;
 }
 
 class MyApp extends StatelessWidget {
@@ -35,43 +23,87 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(), // 로그인 상태 실시간 감지 
-        builder: (context, outerSnapshot) {
-          if (outerSnapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator()); // 로딩중
           } 
-          if (outerSnapshot.hasData) {
-            final user = outerSnapshot.data!; // 로그인된 사용자
-
-            return FutureBuilder<bool>(
-              future: hasWorkoutProfile(user),
-              builder: (context, profileSnapshot) {
-                print('[DEBUG] profileSnapshot.connectionState: ${profileSnapshot.connectionState}');
-                print('[DEBUG] profileSnapshot.hasData: ${profileSnapshot.hasData}');
-                print('[DEBUG] profileSnapshot.data: ${profileSnapshot.data}');
-
-                // 로딩 중일 땐 아무 것도 렌더하지 않기!
-                if (profileSnapshot.connectionState != ConnectionState.done){
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (!profileSnapshot.hasData) {
-                  return Center(child: Text("데이터를 불러오지 못했습니다."));
-                }
-
-                if (profileSnapshot.data == true) {
-                  return HomeScreen();
-                } else {
-                  return WorkoutSelectionScreen();
-                }
-              },
-            );
+          if (snapshot.data != null) {
+            return MainScaffold(); // ✅ 로그인 되어있으면 MainScaffold 바로
           } else {
-            return LoginScreen(); // 로그인 안 됨
+            return LoginScreen(); // ✅ 로그인 안 되어있으면 로그인 화면
           }
         },
       )
     );
   }
 }
+
+class MainScaffold extends StatefulWidget {
+  @override
+  _MainScaffoldState createState() => _MainScaffoldState();
+}
+
+class _MainScaffoldState extends State<MainScaffold> {
+  int _selectedIndex = 0;
+  bool? hasProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    checkProfile();
+  }
+
+  Future<void> checkProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final doc = await FirebaseFirestore.instance
+        .collection('workout_profiles')
+        .doc(user.uid)
+        .get();
+    setState(() {
+      hasProfile = doc.exists;
+    });
+  }
+
+  final List<Widget> _pages =[
+    HomeScreen(),
+    WorkoutHistoryScreen(),
+    SettingsScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (hasProfile == null) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()) // 로딩중
+      );
+    }
+
+    if (hasProfile == false) {
+      return WorkoutHistoryScreen(); // 프로필 업으면 운동 설정 먼저
+    }
+
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.deepPurple,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label:  '기록'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+        ],
+      ),
+    );
+  }
+}
+
 
 
