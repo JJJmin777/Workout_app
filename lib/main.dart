@@ -65,7 +65,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     });
   }
 
-  final List<Widget> _pages =[
+  final List<Widget> _pages = [
     HomeScreen(),
     WorkoutHistoryScreen(),
     SettingsScreen(),
@@ -86,7 +86,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     }
 
     if (hasProfile == false) {
-      return WorkoutHistoryScreen(); // 프로필 업으면 운동 설정 먼저
+      return WorkoutSelectionScreen(); // 프로필 업으면 운동 설정 먼저
     }
 
     return Scaffold(

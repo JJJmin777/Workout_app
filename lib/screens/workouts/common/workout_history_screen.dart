@@ -7,10 +7,9 @@ class WorkoutHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    print("현재 로그인된 UID: ${user?.uid}");
 
     return Scaffold(
-      appBar: AppBar(title: Text("운동 기록 보기")),
+      appBar: AppBar(title: Text("운동 기록")),
       body: FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance
             .collection('workout_logs')
@@ -22,8 +21,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            print("[DEBUG] 불러온 문서 수: ${snapshot.data?.docs.length ?? 0}");
-            return Center(child: Text("운동 기록이 없습니다."));
+            return Center(child: Text("운동 기록이 없습니다.\n오늘 새로운 기록을 남겨보세요! 😊", textAlign: TextAlign.center));
           }
 
           final logs = snapshot.data!.docs;
@@ -35,12 +33,44 @@ class WorkoutHistoryScreen extends StatelessWidget {
               final date = (data['date'] as Timestamp).toDate();
               final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-              return ListTile(
-                leading: Icon(Icons.fitness_center),
-                title: Text("운동: ${data['workout']}"),
-                subtitle: Text("시간: ${data['duration']}초\n날짜: $formattedDate"),
+              final workoutType = data['workout'] ?? '운동';
+              final duration = data['duration'] ?? 0;
+
+              IconData icon;
+              String unit;
+              if (workoutType == 'plank') {
+                icon = Icons.self_improvement;
+                unit = "초";
+              } else if (workoutType == 'running') {
+                icon = Icons.directions_run;
+                unit = "m";
+              } else if (workoutType == 'stairs') {
+                icon = Icons.stairs;
+                unit = "층";
+              } else {
+                icon = Icons.fitness_center;
+                unit = "단위";
+              }
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 4,
+                  child: ListTile(
+                    leading: Icon(icon, size: 40, color: Colors.deepPurple),
+                    title: Text(
+                      workoutType,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    subtitle: Text(
+                      "운동량: $duration$unit\n날짜: $formattedDate",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
               );
-            }
+            },
           );
         },
       ),

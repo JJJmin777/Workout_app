@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workout_app/main.dart';
 import '../workouts/common/workout_selection_screen.dart';
 
 class LoginForm extends StatelessWidget {
@@ -13,8 +14,12 @@ class LoginForm extends StatelessWidget {
         password: passwordController.text.trim(),
       );
 
-      // ✅ 로그인 성공하면 LoginForm 화면 닫기 (뒤로가기처럼)
-      Navigator.pop(context);
+      // ✅ 로그인 성공하면 모든 화면 지우고 MainScaffold로 이동!
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MainScaffold()),
+        (route) => false, // 이전 화면 다 없애기
+      );
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
