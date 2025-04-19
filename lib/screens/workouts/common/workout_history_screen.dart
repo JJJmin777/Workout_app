@@ -3,13 +3,41 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
-class WorkoutHistoryScreen extends StatelessWidget {
+class WorkoutHistoryScreen extends StatefulWidget {
+  @override
+  _WorkoutHistoryScreenState createState() => _WorkoutHistoryScreenState();
+  }
+
+
+
+class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
+  DateTime? _selectedDate;
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: Text("운동 기록")),
+      appBar: AppBar(
+        title: Text("운동 기록"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            onPressed: _pickDate,
+            tooltip: "날짜로 검색",
+          ),
+          if (_selectedDate != null)
+            IconButton(
+              icon: Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  _selectedDate = null;
+                });
+              },
+              tooltip: "검색 해제",
+            ),
+        ],
+      ),
       body: FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance
             .collection('workout_logs')
@@ -26,54 +54,105 @@ class WorkoutHistoryScreen extends StatelessWidget {
 
           final logs = snapshot.data!.docs;
 
+          // 날짜별 그룹화
+          final Map<String, List<Map<String, dynamic>>> groupedLogs = {};
+
+          for (var doc in logs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final date = (data['date'] as Timestamp).toDate();
+            final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+            if (groupedLogs.containsKey(formattedDate)) {
+              groupedLogs[formattedDate]!.add(data);
+            } else {
+              groupedLogs[formattedDate] = [data];
+            }
+          }
+
+          final sortedDates = groupedLogs.keys.toList()..sort((a, b) => b.compareTo(a));
+
+          // 날짜 필터링
+          final filteredDates = _selectedDate == null
+            ? sortedDates
+            : sortedDates.where((d) => d == DateFormat('yyyy-MM-dd').format(_selectedDate!)).toList();
+
+          if (filteredDates.isEmpty) {
+            return Center(
+              child: Text(
+                "선택한 날짜에 운동 기록이 없습니다.\n운동하고 기록을 남겨보세요! 🏃‍♂️",
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
           return ListView.builder(
-            itemCount: logs.length,
+            itemCount: filteredDates.length,
             itemBuilder: (context, index) {
-              final data = logs[index].data() as Map<String, dynamic>;
-              final date = (data['date'] as Timestamp).toDate();
-              final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+              final date = filteredDates[index];
+              final dayLogs = groupedLogs[date]!;
 
-              final workoutType = data['workout'] ?? '운동';
-              final duration = data['duration'] ?? 0;
-
-              IconData icon;
-              String unit;
-              if (workoutType == 'plank') {
-                icon = Icons.self_improvement;
-                unit = "초";
-              } else if (workoutType == 'running') {
-                icon = Icons.directions_run;
-                unit = "m";
-              } else if (workoutType == 'stairs') {
-                icon = Icons.stairs;
-                unit = "층";
-              } else {
-                icon = Icons.fitness_center;
-                unit = "단위";
-              }
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 4,
-                  child: ListTile(
-                    leading: Icon(icon, size: 40, color: Colors.deepPurple),
-                    title: Text(
-                      workoutType,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    subtitle: Text(
-                      "운동량: $duration$unit\n날짜: $formattedDate",
-                      style: TextStyle(fontSize: 14),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    date,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                     ),
                   ),
-                ),
+                  ...dayLogs.map((data) {
+                    final workoutType = data['workout'] ?? '운동';
+                    final duration = data['duration'] ?? 0;
+
+                    IconData icon;
+                    String unit;
+                    if (workoutType == 'plank') {
+                      icon = Icons.self_improvement;
+                      unit = "초";
+                    } else if (workoutType == 'running') {
+                      icon = Icons.directions_run;
+                      unit = "m";
+                    } else if (workoutType == 'stairs') {
+                      icon = Icons.stairs;
+                      unit = "층";
+                    } else {
+                      icon = Icons.fitness_center;
+                      unit = "단위";
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        child: ListTile(
+                          leading: Icon(icon, size: 36, color: Colors.deepPurple),
+                          title: Text(workoutType),
+                          subtitle: Text("운동량: $duration$unit"),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
               );
             },
           );
         },
       ),
     );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023), 
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 }

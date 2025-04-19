@@ -20,7 +20,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '운동 관리 앱',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple, // 기본 색
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.deepPurple, // AppBar 배경색
+          foregroundColor: Colors.white, // AppBar 글자, 아이콘 색
+          elevation: 0, // 그림자 없애고 싶으면
+          centerTitle: true // 제목 가운데 정렬
+        )
+      ),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(), // 로그인 상태 실시간 감지 
         builder: (context, snapshot) {
