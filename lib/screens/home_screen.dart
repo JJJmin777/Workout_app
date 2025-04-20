@@ -8,6 +8,7 @@ import 'workouts/common/workout_history_screen.dart';
 import 'workouts/plank/plnak_screen.dart';
 import 'workouts/stairs/stairs_screen.dart';
 import 'workouts/running/running_screen.dart';
+import '../utils/workout_helper.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -211,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ...getEventsForDay(_selectedDay!).map((e) {
                 final workout = e['workout'];
                 final duration = e['duration'];
+                final info = getWorkoutInfo(workout);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -219,12 +221,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     elevation: 4,
                     color: Colors.white,
                     child: ListTile(
-                      leading: Icon(Icons.fitness_center, color: Colors.deepPurple),
+                      leading: Icon(info.icon, color: Colors.deepPurple),
                       title: Text(
-                        "운동: $workout",
+                        "$workout",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text("소요 시간: $duration초"),
+                      subtitle: Text("운동량: $duration${info.unit}"),
                     ),
                   ),
                 );
@@ -232,17 +234,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 20),
             Text("오늘 운동을 시작하시겠습니까?", style: TextStyle(fontSize: 20)),
-            if (workoutData != null && workoutData!['workouts'] != null) ...[
-              SizedBox(height: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: (workoutData!['workouts'] as List<dynamic>).map((w) {
-                  final workout = w['workout'];
-                  final level = w['level_seconds'];
-                  return Text("• $workout (${level}${getUnit(workout)})");
-                }).toList(),
-              )
-            ],
+            // if (workoutData != null && workoutData!['workouts'] != null) ...[
+            //   SizedBox(height: 10),
+            //   Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: (workoutData!['workouts'] as List<dynamic>).map((w) {
+            //       final workout = w['workout'];
+            //       final level = w['level_seconds'];
+            //       return Text("• $workout (${level}${getUnit(workout)})");
+            //     }).toList(),
+            //   )
+            // ],
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -282,15 +284,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text("운동 다시 설정하기"),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => WorkoutHistoryScreen()),
-                );
-              }, 
-              child: Text("운동 기록 보기")
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (_) => WorkoutHistoryScreen()),
+            //     );
+            //   }, 
+            //   child: Text("운동 기록 보기")
+            // ),
             const SizedBox(height: 40),
           ],
         ),

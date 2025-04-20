@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../../../utils/workout_helper.dart';
+
 class WorkoutHistoryScreen extends StatefulWidget {
   @override
   _WorkoutHistoryScreenState createState() => _WorkoutHistoryScreenState();
@@ -104,21 +106,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                     final workoutType = data['workout'] ?? '운동';
                     final duration = data['duration'] ?? 0;
 
-                    IconData icon;
-                    String unit;
-                    if (workoutType == 'plank') {
-                      icon = Icons.self_improvement;
-                      unit = "초";
-                    } else if (workoutType == 'running') {
-                      icon = Icons.directions_run;
-                      unit = "m";
-                    } else if (workoutType == 'stairs') {
-                      icon = Icons.stairs;
-                      unit = "층";
-                    } else {
-                      icon = Icons.fitness_center;
-                      unit = "단위";
-                    }
+                    final info = getWorkoutInfo(workoutType);
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -126,9 +114,9 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 2,
                         child: ListTile(
-                          leading: Icon(icon, size: 36, color: Colors.deepPurple),
+                          leading: Icon(info.icon, size: 36, color: Colors.deepPurple),
                           title: Text(workoutType),
-                          subtitle: Text("운동량: $duration$unit"),
+                          subtitle: Text("운동량: $duration${info.unit}"),
                         ),
                       ),
                     );
