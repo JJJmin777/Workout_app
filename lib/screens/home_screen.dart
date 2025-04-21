@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:workout_app/utils/firestore_helper.dart';
 import 'workouts/common/workout_selection_screen.dart';
 import 'workouts/common/workout_history_screen.dart';
 
@@ -25,23 +26,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    loadWorkoutProfile();
+    loadProfile();
+    _selectedDay = DateTime.now(); // 처음에 오늘 날짜로 선택
     fetchWorkoutDates();
   }
 
   // ✅ Firestore에서 저장된 운동 불러오기
-  Future<void> loadWorkoutProfile() async {
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('workout_profiles')
-          .doc(user!.uid)
-          .get();
-
-      if (doc.exists) {
-        setState(() {
-          workoutData = doc.data() as Map<String, dynamic>;
-        });
-      }
+  Future<void> loadProfile() async {
+    final data = await loadWorkoutProfile(); // utils 함수 사용
+    if (data != null) {
+      setState(() {
+        workoutData = data;
+      });
     }
   }
 
@@ -197,6 +193,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   _focusedDay = focused;
                 });
               },
+              calendarFormat: CalendarFormat.month, // 기본: 월(Month) 단위로 표시
+              availableCalendarFormats: const {
+                CalendarFormat.month: 'Month' // 월만 선택 가능
+              },
+
               eventLoader: getEventsForDay,
               calendarStyle: CalendarStyle(
                 markerDecoration: BoxDecoration(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home_screen.dart';
+import 'package:workout_app/main.dart';
 
 class QuestionnaireResultScreen extends StatelessWidget {
   final String workout;
@@ -48,7 +48,7 @@ class QuestionnaireResultScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => HomeScreen()),
+                  MaterialPageRoute(builder: (_) => MainScaffold()),
                   (route) => false,
                 );
               },

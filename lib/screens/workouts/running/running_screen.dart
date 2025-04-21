@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../home_screen.dart';
+import 'package:workout_app/main.dart';
+
 
 class RunningScreen extends StatefulWidget {
   final String workout;
@@ -59,7 +60,7 @@ class _RunningScreenState extends State<RunningScreen> {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context, 
-                  MaterialPageRoute(builder: (_) => HomeScreen()),
+                  MaterialPageRoute(builder: (_) => MainScaffold()),
                   (route) => false  
                 );
               }, 
