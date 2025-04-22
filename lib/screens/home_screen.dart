@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:workout_app/screens/workouts/common/workout_edit_screen.dart';
 import 'package:workout_app/utils/firestore_helper.dart';
 import 'workouts/common/workout_selection_screen.dart';
 import 'workouts/common/workout_history_screen.dart';
@@ -262,7 +263,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   context: context,
                   builder: (_) => AlertDialog(
                     title: Text("운동 다시 설정"),
-                    content: Text("현재 설정된 운동 위에 덮어쓰게 됩니다.\n기존 운동은 유지됩니다."),
+                    content: Text("운동 설정을 어떻게 변경하시겠습니까?\n\n"
+                                  "- '새로 설정'은 설문을 통해 다시 추천받습니다.\n"
+                                  "- '직접 수정'은 현재 운동 설정을 편집합니다."),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -276,13 +279,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             MaterialPageRoute(builder: (_) => WorkoutSelectionScreen()),
                           );
                         },
-                        child: Text("계속"),
+                        child: Text("새로 설정"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => WorkoutEditScreen()) // 새로 만든 수정화면
+                          );
+                        },
+                        child: Text("직접 수정"),
                       ),
                     ],
                   ),
                 );
               },
-              child: Text("운동 다시 설정하기"),
+              child: Text("운동 설정 변경"),
             ),
             SizedBox(height: 20),
             // ElevatedButton(
