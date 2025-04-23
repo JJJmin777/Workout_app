@@ -12,6 +12,11 @@ class WorkoutEditScreen extends StatefulWidget {
 class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
   final user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic> workouts = {}; // 운동 데이터
+  final Map<String, int> defaultValues = {
+    'plank': 30,
+    'running': 300,
+    'stairs': 5,
+  };
 
   @override
   void initState() {
@@ -44,6 +49,18 @@ class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
     }
   }
 
+  void addWorkout(String type) {
+    if (!workouts.containsKey(type)) {
+      setState(() {
+        workouts[type] = {'level_seconds': defaultValues[type]!};
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$type 운동은 이미 추가되어 있습니다.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (workouts.isEmpty) {
@@ -64,27 +81,64 @@ class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
           return ListTile(
             leading: Icon(info.icon, color: Colors.blueAccent),
             title: Text('$workout 설정'),
-            subtitle: TextField(
-              keyboardType: TextInputType.number,
-              controller: TextEditingController(text: value.toString()),
-              onChanged: (val) {
-                setState(() {
-                  workouts[workout]['level_seconds'] = int.tryParse(val) ?? 0;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: '수정할 값 (${info.unit})',
-              ),
+            subtitle: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: value.toString()),
+                    onChanged: (val) {
+                      setState(() {
+                        workouts[workout]['level_seconds'] = int.tryParse(val) ?? 0;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: '수정할 값 (${info.unit})',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    setState(() {
+                      workouts.remove(workout);
+                    });
+                  },
+                )
+              ],
             ),
           );
         }).toList(),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: saveChanges,
-          child: Text('저장하기'),
-        ), 
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: saveChanges,
+              child: Text('저장하기'),
+            ),
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => addWorkout('plank'),
+                  child: Text('플랭크 추가'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addWorkout('running'),
+                  child: Text('러닝 추가'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addWorkout('stairs'),
+                  child: Text('계단 추가'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

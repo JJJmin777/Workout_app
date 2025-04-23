@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return '';
   }
 
-  void startWorkoutSequence(List<dynamic> workouts) async {
+  void startWorkoutSequence(Map<String, dynamic> workoutsMap) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -102,7 +102,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final doneToday = snapshot.docs.map((doc) => doc['workout'] as String).toSet();
 
-    final remainingWorkouts = workouts.where((w) => !doneToday.contains(w['workout'])).toList();
+    final remainingWorkouts = workoutsMap.entries
+      .where((e) => !doneToday.contains(e.key))
+      .map((e) => {'workout': e.key, 'level_seconds': e.value['level_seconds']})
+      .toList();
 
     if (remainingWorkouts.isEmpty) {
       showDialog(
@@ -251,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               onPressed: () {
                 if (workoutData == null || workoutData!['workouts'] == null) return;
-                final workouts = List<Map<String, dynamic>>.from(workoutData!["workouts"]);
+                final workouts = Map<String, dynamic>.from(workoutData!["workouts"]);
                 startWorkoutSequence(workouts);
               },
               child: Text("운동 시작하기"),

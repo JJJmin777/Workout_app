@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// 데이터 저장
+// 설문 데이터 저장
 Future<void> saveResultToFirebase({
   required String workout, 
   required int levelSeconds,
