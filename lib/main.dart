@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'screens/home_screen.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/auth/auth_choice_screen.dart';
 import 'screens/workouts/common/workout_selection_screen.dart';
 import 'screens/workouts/common/workout_history_screen.dart';
 import 'screens/settings/settings_screen.dart';
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.data != null) {
             return MainScaffold(); // ✅ 로그인 되어있으면 MainScaffold 바로
           } else {
-            return LoginScreen(); // ✅ 로그인 안 되어있으면 로그인 화면
+            return AuthChoiceScreen(); // ✅ 로그인 안 되어있으면 로그인 화면
           }
         },
       )
