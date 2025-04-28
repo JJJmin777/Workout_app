@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workout_app/screens/auth/login_screen.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/auth/auth_choice_screen.dart';
@@ -87,6 +88,9 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    
     if (hasProfile == null) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator()) // 로딩중

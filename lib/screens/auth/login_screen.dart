@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:workout_app/main.dart';
 import '../../services/auth_service.dart';
-import '../home_screen.dart';
+import '../../main.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -23,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
+        MaterialPageRoute(builder: (_) => MainScaffold()), // 로그인 성공 후 홈으로
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

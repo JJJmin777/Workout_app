@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:workout_app/screens/auth/register_success_screen.dart';
 import '../../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -17,10 +19,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text.trim(), 
         password: _passwordController.text.trim(),
       );
+
+      // 여기서 바로 로그아웃 시킨다!
+      await FirebaseAuth.instance.signOut();
+
+      // 그리고 축하 메시지 띄우기
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("가입 완료! 이메일 인증 후 로그인해주세요.")),
-        );
-        Navigator.pop(context); // 로그인 화면으로 이동
+        SnackBar(content: Text('🎉 회원가입 완료! 이메일 인증 후 로그인해주세요.')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => RegisterSuccessScreen()),
+      ); // 가입 완료 화면으로 이동
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("회원가입 실패: ${e.toString()}")),

@@ -5,20 +5,25 @@ class AuthService {
 
   // 회원가입
   Future<void> signUp({required String email, required String password}) async {
-    final UserCredential = await _auth.createUserWithEmailAndPassword(
+    final userCredential = await _auth.createUserWithEmailAndPassword(
       email: email, 
       password: password,
     );
-    await UserCredential.user?.sendEmailVerification(); // 인증 메일 보내기
+
+    final user = userCredential.user;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification(); // 인증 메일 보내기
+    }
   }
 
   // 로그인
   Future<void> login({required String email, required String password}) async {
-    final UserCredential = await _auth.signInWithEmailAndPassword(
+    final userCredential = await _auth.signInWithEmailAndPassword(
       email: email, 
       password: password,
     );
-    if (!UserCredential.user!.emailVerified) {
+    
+    if (!userCredential.user!.emailVerified) {
       await _auth.signOut();
       throw Exception('이메일 인증이 완료되지 않았습니다.');
     }
