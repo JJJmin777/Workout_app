@@ -4,7 +4,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // 회원가입
-  Future<void> signUp({required String email, required String password}) async {
+  Future<UserCredential> signUp({required String email, required String password}) async {
     final userCredential = await _auth.createUserWithEmailAndPassword(
       email: email, 
       password: password,
@@ -14,6 +14,8 @@ class AuthService {
     if (user != null && !user.emailVerified) {
       await user.sendEmailVerification(); // 인증 메일 보내기
     }
+
+    return userCredential; // 리턴 있음
   }
 
   // 로그인

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workout_app/main.dart';
 import '../../../utils/firestore_helper.dart';
 import '../../../utils/workout_helper.dart';
 
@@ -45,7 +46,11 @@ class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('운동 설정이 저장되었습니다.')),
       );
-      Navigator.pop(context); // 저장하고 돌아가기
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => MainScaffold()),
+        (route) => false,
+      ); // 저장하고 돌아가기
     }
   }
 

@@ -170,16 +170,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // 이걸 추가하면 뒤로가기 버튼 사라짐
         title: Text("환영합니다, ${user?.email ?? '사용자'}님"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-            },
-          )
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.logout),
+        //     onPressed: () async {
+        //       await FirebaseAuth.instance.signOut();
+        //       Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+        //     },
+        //   )
+        // ],
       ),
       body: SingleChildScrollView(
         child: Column(

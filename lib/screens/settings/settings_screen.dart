@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../auth/login_screen.dart';
+import 'package:workout_app/screens/auth/auth_choice_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -28,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => LoginScreen()),
+                  MaterialPageRoute(builder: (_) => AuthChoiceScreen()),
                   (route) => false
                 );
               },

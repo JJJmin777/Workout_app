@@ -15,22 +15,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _register() async {
     try {
-      await _authService.signUp(
+      final userCredential = await _authService.signUp(
         email: _emailController.text.trim(), 
         password: _passwordController.text.trim(),
       );
 
+      final email = userCredential.user?.email ?? "알 수 없음"; // 받아서
+
       // 여기서 바로 로그아웃 시킨다!
       await FirebaseAuth.instance.signOut();
 
-      // 그리고 축하 메시지 띄우기
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('🎉 회원가입 완료! 이메일 인증 후 로그인해주세요.')),
-      );
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => RegisterSuccessScreen()),
+        MaterialPageRoute(builder: (_) => RegisterSuccessScreen(userEmail: email,)), // 전달
       ); // 가입 완료 화면으로 이동
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
