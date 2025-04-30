@@ -63,16 +63,24 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   Future<void> checkProfile() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    final doc = await FirebaseFirestore.instance
-        .collection('workout_profiles')
-        .doc(user.uid)
-        .get();
-    setState(() {
-      hasProfile = doc.exists;
-    });
-  }
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final doc = await FirebaseFirestore.instance
+          .collection('workout_profiles')
+          .doc(user.uid)
+          .get();
+
+      setState(() {
+        hasProfile = doc.exists;
+      });
+    } catch (e) {
+      print("🔥 프로필 확인 중 오류: $e");
+      setState(() {
+        hasProfile = false; // 실패 시 기본 처리
+      });
+    }    
+  } 
 
   final List<Widget> _pages = [
     HomeScreen(),

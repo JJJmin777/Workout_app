@@ -7,7 +7,7 @@ import 'package:workout_app/utils/firestore_helper.dart';
 import 'workouts/common/workout_selection_screen.dart';
 import 'workouts/common/workout_history_screen.dart';
 
-import 'workouts/plank/plnak_screen.dart';
+import 'workouts/plank/plank_screen.dart';
 import 'workouts/stairs/stairs_screen.dart';
 import 'workouts/running/running_screen.dart';
 import '../utils/workout_helper.dart';
