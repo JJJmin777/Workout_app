@@ -104,7 +104,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                   ),
                   ...dayLogs.map((data) {
                     final workoutType = data['workout'] ?? '운동';
-                    final duration = data['duration'] ?? 0;
+                    final workoutValue = data['workoutValue'] ?? 0;
 
                     final info = getWorkoutInfo(workoutType);
 
@@ -116,7 +116,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                         child: ListTile(
                           leading: Icon(info.icon, size: 36, color: Colors.deepPurple),
                           title: Text(workoutType),
-                          subtitle: Text("운동량: $duration${info.unit}"),
+                          subtitle: Text("운동량: $workoutValue${info.unit}"),
                         ),
                       ),
                     );

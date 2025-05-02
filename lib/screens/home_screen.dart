@@ -56,14 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
     for (var doc in snapshot.docs) {
       final data = doc.data();
       final workoutName = data['workout'] ?? '운동';
-      final duration = data['duration'] ?? 0;
+      final workoutValue = data['workoutValue'] ?? 0;
       final timestamp = data['date'] as Timestamp?;
       if (timestamp != null) {
         final date = DateTime(timestamp.toDate().year, timestamp.toDate().month, timestamp.toDate().day);
         events.update(
           date, 
-          (value) => [...value, {'workout': workoutName, 'duration': duration}], // value가 있으면 복사한뒤 workoutName을 저장
-          ifAbsent: () => [{'workout': workoutName, 'duration': duration}]
+          (value) => [...value, {'workout': workoutName, 'workoutValue': workoutValue}], // value가 있으면 복사한뒤 workoutName을 저장
+          ifAbsent: () => [{'workout': workoutName, 'workoutValue': workoutValue}]
         );
       }
     }
@@ -217,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_selectedDay != null)
               ...getEventsForDay(_selectedDay!).map((e) {
                 final workout = e['workout'];
-                final duration = e['duration'];
+                final workoutValue = e['workoutValue'];
                 final info = getWorkoutInfo(workout);
 
                 return Padding(
@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "$workout",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text("운동량: $duration${info.unit}"),
+                      subtitle: Text("운동량: $workoutValue${info.unit}"),
                     ),
                   ),
                 );

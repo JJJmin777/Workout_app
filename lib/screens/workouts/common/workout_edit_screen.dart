@@ -103,10 +103,36 @@ class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 운동이 비어 있을 때
     if (workouts.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text('운동 설정 변경')),
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '운동 설정이 비어 있습니다.\n운동을 추가해 주세요.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => _showWorkoutAddDialog(),
+                child: Text('운동 추가'),
+              ),
+              SizedBox(height: 20),
+              // ElevatedButton(
+              //   onPressed: null, // 비활성화된 상태
+              //   child: Text('저장하기'),
+              //   style: ElevatedButton.styleFrom(
+              //     minimumSize: Size(double.infinity, 48),
+              //     backgroundColor: Colors.deepPurple, // backgroundColor로 변경,
+              //   ),
+              // ),
+            ],
+          ),
+        ), 
       );
     }
 
@@ -171,7 +197,7 @@ class _WorkoutEditScreenState extends State<WorkoutEditScreen> {
     bottomNavigationBar: Padding(
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton(
-        onPressed: saveChanges,
+        onPressed: workouts.isEmpty ? null : saveChanges, // 운동이 비어있지 않으면 저장하기
         child: Text('저장하기'),
         style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 48)),
       ),
