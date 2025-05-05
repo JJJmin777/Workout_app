@@ -6,8 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:workout_app/main.dart';
 
-
-
 class RunningScreen extends StatefulWidget {
   final String workout;
   final int targetDistance;
@@ -60,23 +58,26 @@ class _RunningScreenState extends State<RunningScreen> {
       });
 
       showDialog(
-        context: context, 
-        builder: (_) => AlertDialog(
-          title: Text("운동 완료!"),
-          content: Text("${widget.targetDistance}m 러닝 완료!. 소요 시간: ${formatTime(elapsedSeconds)}수고하셨어요!"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context, 
-                  MaterialPageRoute(builder: (_) => MainScaffold()),
-                  (route) => false  
-                );
-              }, 
-              child: Text("홈으로 가기"),
-            )
-          ],
-        ),
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: Text("운동 완료!"),
+              content: Text(
+                "${widget.targetDistance}m 러닝 완료!. 소요 시간: ${formatTime(elapsedSeconds)}수고하셨어요!",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => MainScaffold()),
+                      (route) => false,
+                    );
+                  },
+                  child: Text("홈으로 가기"),
+                ),
+              ],
+            ),
       );
     }
   }
@@ -85,21 +86,34 @@ class _RunningScreenState extends State<RunningScreen> {
   void _startLocationTracking() {
     _location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
-        _markers.add(Marker(
-          markerId: MarkerId('user_location'),
-          position: LatLng(currentLocation.latitude!, currentLocation.longitude!),
-          infoWindow: InfoWindow(title: "현재 위치"),
-        ));
-        _locations.add(LatLng(currentLocation.latitude!, currentLocation.longitude!));
-        _polylines.add(Polyline(
-          polylineId: PolylineId('running_route'),
-          visible: true,
-          points: _locations,
-          width: 5,
-          color: Colors.blue,
-        ));
+        _markers.add(
+          Marker(
+            markerId: MarkerId('user_location'),
+            position: LatLng(
+              currentLocation.latitude!,
+              currentLocation.longitude!,
+            ),
+            infoWindow: InfoWindow(title: "현재 위치"),
+          ),
+        );
+        _locations.add(
+          LatLng(currentLocation.latitude!, currentLocation.longitude!),
+        );
+        _polylines.add(
+          Polyline(
+            polylineId: PolylineId('running_route'),
+            visible: true,
+            points: _locations,
+            width: 5,
+            color: Colors.blue,
+          ),
+        );
       });
-      _mapController.moveCamera(CameraUpdate.newLatLng(LatLng(currentLocation.latitude!, currentLocation.longitude!)));
+      _mapController.moveCamera(
+        CameraUpdate.newLatLng(
+          LatLng(currentLocation.latitude!, currentLocation.longitude!),
+        ),
+      );
     });
   }
 
@@ -119,44 +133,48 @@ class _RunningScreenState extends State<RunningScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("러닝")),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.directions_run, size: 100, color: Colors.orange,),
-            SizedBox(height: 20),
-            Text("목표 거리: ${widget.targetDistance}m", style: TextStyle(fontSize: 20)),
-            SizedBox(height: 10),
-            Text("경과 시간: ${formatTime(elapsedSeconds)}", style: TextStyle(fontSize: 24)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: toggleTimer,
-              child: Text(isRunning ? "Stop" : "Start"),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                timer?.cancel();
-                saveWorkout();
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.directions_run, size: 100, color: Colors.orange),
+          SizedBox(height: 20),
+          Text(
+            "목표 거리: ${widget.targetDistance}m",
+            style: TextStyle(fontSize: 20),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "경과 시간: ${formatTime(elapsedSeconds)}",
+            style: TextStyle(fontSize: 24),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: toggleTimer,
+            child: Text(isRunning ? "Stop" : "Start"),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              timer?.cancel();
+              saveWorkout();
+            },
+            child: Text("운동 완료"),
+          ),
+          // 구글 맵 부분
+          Expanded(
+            child: GoogleMap(
+              onMapCreated: (GoogleMapController controller) {
+                _mapController = controller;
               },
-              child: Text("운동 완료"),
-            ),
-            // 구글 맵 부분
-            Expanded(
-              child: GoogleMap(
-                onMapCreated: (GoogleMapController controller) {
-                  _mapController = controller;
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(37.7749, -122.4194), // 샌프란시스코 예시
-                  zoom: 15,
-                ),
-                markers: _markers,
-                polylines: _polylines,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(37.7749, -122.4194), // 샌프란시스코 예시
+                zoom: 15,
               ),
-            )
-          ],
-        ),
+              markers: _markers,
+              polylines: _polylines,
+            ),
+          ),
+        ],
       ),
     );
   }
