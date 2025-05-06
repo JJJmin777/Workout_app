@@ -1,3 +1,3 @@
 <resources>
-    <string name="google_maps_key" value="" />
+    <string name="google_maps_key"></string>
 </resources>
