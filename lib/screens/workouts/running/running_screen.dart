@@ -167,7 +167,7 @@ class _RunningScreenState extends State<RunningScreen> {
                 _mapController = controller;
               },
               initialCameraPosition: CameraPosition(
-                target: LatLng(37.7749, -122.4194), // 샌프란시스코 예시
+                target: LatLng(37.5642, 127.0016), // 서울 중심으로 예시
                 zoom: 15,
               ),
               markers: _markers,

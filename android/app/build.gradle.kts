@@ -29,6 +29,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // ───── Kotlin DSL 구문으로 환경변수 읽어서 string 리소스 주입 ─────
+        val mapsKey: String = project.findProperty("GOOGLE_MAPS_API_KEY") as? String ?: ""
+        resValue("string", "google_maps_key", mapsKey)
     }
 
     buildTypes {
