@@ -38,6 +38,7 @@ dependencies:
   location: ^5.0.0 # 위치 정보 패키지
   google_maps_flutter: ^2.1.1 # 구글 맵을 사용할 수 있는 패키지
   flutter_dotenv: ^5.0.2
+  geolocator: ^12.0.0 # GPS를 통해 사용자의 현재 위치를 얻고,거리 계산, 방향(각도), 위치 권한 요청
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
