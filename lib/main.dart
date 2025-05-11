@@ -21,6 +21,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '운동 관리 앱',
+      // 디버그 배너 제거
+      debugShowCheckedModeBanner: false,
+      
       theme: ThemeData(
         primarySwatch: Colors.deepPurple, // 기본 색
         appBarTheme: AppBarTheme(
