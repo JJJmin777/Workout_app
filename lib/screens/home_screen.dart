@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:workout_app/screens/workouts/common/workout_edit_screen.dart';
+import 'package:workout_app/screens/workouts/common/workout_log_screen.dart';
 import 'package:workout_app/utils/firestore_helper.dart';
 import 'workouts/common/workout_selection_screen.dart';
 import 'workouts/common/workout_history_screen.dart';
@@ -168,10 +169,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final email = user?.email;
+    final nickname = email != null ? email.split('@').first : '사용자';
+    
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false, // 이걸 추가하면 뒤로가기 버튼 사라짐
-        title: Text("환영합니다, ${user?.email ?? '사용자'}님"),
+        title: Text("환영합니다,  $nickname님"), // , ${user?.email ?? '사용자'}님
         // actions: [
         //   IconButton(
         //     icon: Icon(Icons.logout),
@@ -233,6 +237,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text("운동량: $workoutValue${info.unit}"),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkoutLogScreen(
+                              workoutType: workout,
+                              unit: info.unit,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
