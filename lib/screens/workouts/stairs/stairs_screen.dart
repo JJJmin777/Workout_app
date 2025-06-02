@@ -23,7 +23,7 @@ class _StairsTimerScreenState extends State<StairsTimerScreen> {
       await FirebaseFirestore.instance.collection('workout_logs').add({
         'userId': user.uid,
         'workout': widget.workout,
-        'duration': widget.targetfloors,
+        'workoutValue': widget.targetfloors,
         'date': FieldValue.serverTimestamp(),
       });
 
