@@ -14,6 +14,7 @@ class WorkoutLogScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("12321312312312321321312321321312 $workoutType");
     final user = FirebaseAuth.instance.currentUser!;
     final logsQuery = FirebaseFirestore.instance
         .collection('workout_logs')

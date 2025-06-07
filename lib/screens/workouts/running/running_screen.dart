@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:workout_app/main.dart';
 
+import 'package:workout_app/utils/workout_timer.dart'; // 타이머 임포트
+
 class RunningScreen extends StatefulWidget {
   final String workout;
   final int targetDistance;
@@ -22,8 +24,7 @@ class RunningScreen extends StatefulWidget {
 }
 
 class _RunningScreenState extends State<RunningScreen> {
-  int elapsedSeconds = 0;
-  Timer? _timer;
+  late WorkoutTimer _timer;
   bool isRunning = false;
   double _totalDistance = 0.0;
   LatLng? _initialPosition; // 초기 위치
@@ -37,7 +38,29 @@ class _RunningScreenState extends State<RunningScreen> {
   @override
   void initState() {
     super.initState();
+    _timer = WorkoutTimer(onTick: (_) {
+      setState(() {}); // 경과 시간 UI 갱신
+    });
     _initLocation();
+  }
+
+  void toggleRun() {
+    if (isRunning) {
+      _timer.stop();
+      _locationSubscription?.cancel();
+    } else {
+      _timer.start();
+      _startLocationTracking();
+    }
+    setState(() {
+      isRunning = !isRunning;
+    });
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$secs";
   }
 
   Future<void> _initLocation() async {
@@ -56,13 +79,13 @@ class _RunningScreenState extends State<RunningScreen> {
     });
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
-        elapsedSeconds++;
-      });
-    });
-  }
+  // void _startTimer() {
+  //   _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+  //     setState(() {
+  //       elapsedSeconds++;
+  //     });
+  //   });
+  // }
 
   // 위치 추적하기
   void _startLocationTracking() {
@@ -109,24 +132,6 @@ class _RunningScreenState extends State<RunningScreen> {
     });
   }
 
-  void toggleStartStop() {
-    if (isRunning) {
-      _timer?.cancel();
-      _locationSubscription?.cancel();
-    } else {
-      _startTimer();
-      _startLocationTracking();
-    }
-    setState(() {
-      isRunning = !isRunning;
-    });
-  }
-
-  String _formatTime(int seconds) {
-    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
-    final secs = (seconds % 60).toString().padLeft(2, '0');
-    return "$minutes:$secs";
-  }
 
   Future<void> _saveWorkout() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -141,7 +146,7 @@ class _RunningScreenState extends State<RunningScreen> {
     await FirebaseFirestore.instance.collection('workout_logs').add({
       'userId': user.uid,
       'workout': widget.workout,
-      'time_seconds': elapsedSeconds, // 경과 시간
+      'time_seconds': _timer.elapsedSeconds, // 경과 시간
       'workoutValue': _totalDistance, // 거리
       'route': routeGeoPoints,
       'date': FieldValue.serverTimestamp(),
@@ -154,7 +159,7 @@ class _RunningScreenState extends State<RunningScreen> {
             title: const Text("운동 완료!"),
             content: Text(
               "${widget.targetDistance}m 러닝 완료!." 
-              "소요 시간: ${_formatTime(elapsedSeconds)}, "
+              "소요 시간: ${_formatTime(_timer.elapsedSeconds)}, "
               '총 이동 거리: ${_totalDistance.toStringAsFixed(1)}m 수고하셨어요!'
             ),
             actions: [
@@ -175,7 +180,7 @@ class _RunningScreenState extends State<RunningScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // 타이머 멈춤
+    _timer.dispose(); // 타이머 멈춤
     _locationSubscription?.cancel(); // 위치 추적 중단
     super.dispose(); // Flutter 시스템이 원래 하던 리소스 정리 작업 실행 (필수)
   }
@@ -195,7 +200,7 @@ class _RunningScreenState extends State<RunningScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            '경과 시간: ${_formatTime(elapsedSeconds)}',
+            '경과 시간: ${_formatTime(_timer.elapsedSeconds)}',
             style: const TextStyle(fontSize: 24),
           ),
           const SizedBox(height: 10),
@@ -208,13 +213,13 @@ class _RunningScreenState extends State<RunningScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: toggleStartStop,
+                onPressed: toggleRun,
                 child: Text(isRunning ? 'Stop' : 'Start'),
               ),
               const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (isRunning) toggleStartStop();
+                  if (isRunning) toggleRun();
                   _saveWorkout();
                 },
                 child: const Text('운동 완료'),
