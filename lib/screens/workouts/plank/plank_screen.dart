@@ -55,6 +55,7 @@ class _PlankScreenState extends State<PlankScreen> {
       await FirebaseFirestore.instance.collection('workout_logs').add({
         'userId': user.uid,
         'workout': widget.workout,
+        'time_seconds': widget.targetSeconds,
         'workoutValue': widget.targetSeconds,
         'date': FieldValue.serverTimestamp(),
       });
